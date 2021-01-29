@@ -17,8 +17,8 @@ def prep_delay_data(proj_dir, split=0.15):
 
     # get prepared mask
     delay_mask = delay_out["DelayMask"].values
-    delays_nan = delay_out["Delays"].isna().values
-    delay_mask = delay_mask & (not delays_nan)  # Also mask NaN values
+    delays_nan = delay_out["Delays"].notna().values
+    delay_mask = delay_mask & delays_nan  # Also mask NaN values
     delay_argmask = np.argwhere(delay_mask).flatten()  # create arg_mask to apply to inps and outputs
 
     # apply masking of events
