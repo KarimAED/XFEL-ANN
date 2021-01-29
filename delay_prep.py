@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import scipy.stats as sps
 import pandas as pd
@@ -5,10 +7,10 @@ import pandas as pd
 from prep_utils import train_test_norm
 
 
-def prep_delay_data(split=0.15):
+def prep_delay_data(proj_dir, split=0.15):
     # Load double pulse data
-    double_inp = pd.read_table("./Data/double_inputs.tsv.gz")
-    double_out = pd.read_table("./Data/double_outputs.tsv.gz")
+    double_inp = pd.read_table(os.path.join(proj_dir, "Data/double_inputs.tsv.gz"))
+    double_out = pd.read_table(os.path.join(proj_dir, "Data/double_outputs.tsv.gz"))
 
     # select only delay columns
     delay_out = double_out.loc[:, ["Delays", "DelayMask"]].copy()
