@@ -6,7 +6,7 @@ Created on Tue Dec 22 16:41:59 2020
 """
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import InputLayer, Dense, Dropout
+from tensorflow.keras.layers import InputLayer, Dense, Dropout, BatchNormalization
 
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y, check_is_fitted, check_array
@@ -18,13 +18,14 @@ strategy = tf.distribute.MirroredStrategy()
 class ANN(BaseEstimator):
 
     def __init__(self, shape=[20, 20, 20, 10], drop_out=0.0,
-                 activation="relu", loss="mae", epochs=10000, verbose=0):
+                 activation="relu", loss="mae", epochs=10000, batch_norm=True, verbose=0):
 
         self.shape = shape
         self.drop_out = drop_out
         self.activation = activation
         self.loss = loss
         self.epochs = epochs
+        self.batch_norm = batch_norm
         self.verbose = verbose
 
     def _more_tags(self):
@@ -61,9 +62,13 @@ class ANN(BaseEstimator):
                                 activation=self.activation,
                                 kernel_regularizer="l2"))
                 model.add(Dropout(self.drop_out))
+                if self.batch_norm:
+                    model.add(BatchNormalization())
 
             model.add(Dense(self.shape[-1], activation="sigmoid"))
             model.add(Dropout(self.drop_out))
+            if self.batch_norm:
+                model.add(BatchNormalization())
             model.add(Dense(outp_len))
 
             optim = tf.keras.optimizers.Adagrad(learning_rate=0.0015)
@@ -78,8 +83,6 @@ class ANN(BaseEstimator):
 
         # print(y)
         y = np.array(y)
-
-        print(np.mean(y), np.std(y))
 
         if len(y.shape) == 2:
             o_shape = y.shape[1]
