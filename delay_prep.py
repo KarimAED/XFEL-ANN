@@ -47,7 +47,34 @@ def prep_delay_data(proj_dir, split=0.15):
     return train_test_norm(delay_inp, delay_out, split)
 
 
+def save_delays(proj_dir, split):
+    x_tr, y_tr, x_te, y_te, x_ref, y_ref = prep_delay_data(proj_dir, split)
+    path = os.path.join(proj_dir, "Data/Delays")
+    if not os.path.exists(path):
+        d = os.getcwd()
+        os.chdir(os.path.join(proj_dir, "Data"))
+        os.mkdir("Delays")
+        os.chdir(d)
+    np.savez_compressed(os.path.join(path, "data.npz"), x_train=x_tr, y_train=y_tr, x_test=x_te, y_test=y_te)
+    x_ref.to_pickle(os.path.join(path, "inp_ref.pkl"))
+    y_ref.to_pickle(os.path.join(path, "out_ref.pkl"))
+
+
+def load_delays(proj_dir, split=0.15):
+    if not os.path.exists(os.path.join(proj_dir, "Data/Delays")):
+        save_delays(proj_dir, split)
+
+    data = np.load(os.path.join(proj_dir, "Data/Delays/data.npz"))
+
+    x_train = data["x_train"]
+    y_train = data["y_train"]
+    x_test = data["x_test"]
+    y_test = data["y_test"]
+    x_ref = pd.read_pickle(os.path.join(proj_dir, "Data/Delays/inp_ref.pkl"))
+    y_ref = pd.read_pickle(os.path.join(proj_dir, "Data/Delays/out_ref.pkl"))
+
+    return x_train, y_train, x_test, y_test, x_ref, y_ref
+
+
 if __name__ == "__main__":
-    # for debugging purposes only
-    x_tr, x_te, y_tr, y_te, x_ref, y_ref = prep_delay_data()
-    print(x_tr.shape, x_te.shape, y_tr.shape, y_te.shape)
+    print(load_delays(os.getcwd()))
