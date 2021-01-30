@@ -3,6 +3,8 @@ import os
 
 import numpy as np
 
+from delay_prep import save_delays
+
 
 def get_inputs(source, files):
     # init empty placeholders
@@ -141,5 +143,4 @@ if __name__ == "__main__":
     os.chdir(f_path)
     format_single(single_dir, target_dir)
     format_double(double_dir, target_dir)
-
-
+    save_delays(f_path, 0.15)
