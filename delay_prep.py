@@ -47,8 +47,8 @@ def prep_delay_data(proj_dir, split=0.15):
     return train_test_norm(delay_inp, delay_out, split)
 
 
-def save_delays(proj_dir, split):
-    x_tr, y_tr, x_te, y_te, x_ref, y_ref = prep_delay_data(proj_dir, split)
+def save_delays(proj_dir, split=0.15):
+    x_tr, x_te, y_tr, y_te, x_ref, y_ref = prep_delay_data(proj_dir, split)
     path = os.path.join(proj_dir, "Data/Delays")
     if not os.path.exists(path):
         d = os.getcwd()
@@ -77,4 +77,5 @@ def load_delays(proj_dir, split=0.15):
 
 
 if __name__ == "__main__":
-    print(load_delays(os.getcwd()))
+    # Run this to generate preprocessed delay files
+    save_delays(os.getcwd())
