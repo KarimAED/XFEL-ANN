@@ -33,6 +33,10 @@ def main():
     args = get_args()
     folder = args["inp-folder"]
     del args["inp-folder"]
+    if "epochs" in args:
+        ep = args["epochs"]
+    else:
+        ep = 10000
     loc = os.path.dirname(sys.argv[0])
     data_loc = os.path.join(loc, "Data")
     x_tr, x_te, y_tr, y_te, i_ref, o_ref = load_inp_folder(os.path.join(data_loc, folder))
@@ -41,8 +45,9 @@ def main():
     print(o_ref)
 
     ann = ANN(**args)
-    ann.fit(x_tr, y_tr)
+    ann.fit(x_tr, y_tr, epochs=ep)
     print(ann.score(x_te, y_te))
+
 
 if __name__ == "__main__":
     sys.exit(main())

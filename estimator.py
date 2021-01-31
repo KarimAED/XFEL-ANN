@@ -17,14 +17,18 @@ strategy = tf.distribute.MirroredStrategy()
 
 class ANN(BaseEstimator):
 
-    def __init__(self, shape=[20, 20, 20, 10], drop_out=0.0,
-                 activation="relu", loss="mae", epochs=10000, batch_norm=True, verbose=0):
+    def __init__(self,
+                 shape=[20, 20, 20, 10],
+                 drop_out=0.0,
+                 activation="relu",
+                 loss="mae",
+                 batch_norm=False,
+                 verbose=0):
 
         self.shape = shape
         self.drop_out = drop_out
         self.activation = activation
         self.loss = loss
-        self.epochs = epochs
         self.batch_norm = batch_norm
         self.verbose = verbose
 
@@ -77,7 +81,7 @@ class ANN(BaseEstimator):
             print(model.summary())
             self.ANN_ = model
 
-    def fit(self, X, y):
+    def fit(self, X, y, epochs=10000, callbacks=None, sample_weight=None):
 
         check_X_y(X, y, multi_output=True)
 
@@ -94,7 +98,7 @@ class ANN(BaseEstimator):
         with strategy.scope():
             self.set_up_model(X.shape[1], o_shape)
 
-            self.ANN_.fit(X, y, 1000, self.epochs, verbose=self.verbose)
+            self.ANN_.fit(X, y, 1000, epochs=epochs, verbose=self.verbose, callbacks=callbacks)
 
         return self
 
