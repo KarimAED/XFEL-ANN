@@ -4,6 +4,6 @@
 module load anaconda3/personal
 module load cuda
 
-python $HOME/XFEL-ANN/model_fit.py Delays --shape 50 50 20 20 20 -vv -a relu -l mae -e 40000 --no-batch_norm
+python $HOME/XFEL-ANN/model_fit.py Delays --shape 50 50 20 20 20 -vv -a relu -l mae -e 40000 --batch_norm False
 mkdir $WORK/delay_$PBS_JOBID
 cp -r * $WORK/delay_$PBS_JOBID
