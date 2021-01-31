@@ -129,8 +129,6 @@ def format_double(source, target):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        pass  # Implement raise error later
     f_path = os.path.dirname(sys.argv[0])
     target_dir = os.path.join(f_path, "Data")
     if not os.path.exists(os.path.join(f_path, "DataLCLS2017")):
@@ -140,7 +138,8 @@ if __name__ == "__main__":
     single_dir = os.path.join(data_dir, "amof6215")
     double_dir = os.path.join(data_dir, "amo86815")
 
-    os.chdir(f_path)
+    if os.path.normpath(f_path) != ".":
+        os.chdir(f_path)
     format_single(single_dir, target_dir)
     format_double(double_dir, target_dir)
     save_delays(f_path, 0.15)

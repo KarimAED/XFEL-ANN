@@ -11,6 +11,9 @@ scipy = "^1.6.0"
 pandas = "^1.2.1"
 six = "1.15.0"
 sklearn = "^0.0"
+tensorboard = "^2.4.1"
+tensorflow = "^2.4.1"
+keras-tuner = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 
