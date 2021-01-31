@@ -17,7 +17,7 @@ def get_args():
     parser.add_argument("--activation", "-a", default=argparse.SUPPRESS)
     parser.add_argument("--loss", "-l", default=argparse.SUPPRESS)
     parser.add_argument("--epochs", "-e", type=int, default=argparse.SUPPRESS)
-    parser.add_argument("--batch_norm", action=argparse.BooleanOptionalAction, default=argparse.SUPPRESS)
+    parser.add_argument("--batch_norm", type=bool, default=argparse.SUPPRESS)
     args = parser.parse_args()
     return args.__dict__
 
