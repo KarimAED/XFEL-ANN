@@ -58,6 +58,12 @@ def main():
     est = ann(layer_list, out_sh, args["loss"], opt)
     est.fit(x_tr, y_tr, epochs=args["epochs"], verbose=args["verbose"])
     print(est.evaluate(x_te, y_te))
+    x = np.append(x_tr, x_te, axis=0)
+    y = np.append(y_tr, y_te, axis=0)
+    
+    pred = est.predict(x)
+    
+    np.savez_compressed("val_v_pred", val=y, pred=pred)
 
 
 if __name__ == "__main__":
