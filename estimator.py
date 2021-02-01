@@ -110,7 +110,7 @@ class ANN(BaseEstimator):
         with strategy.scope():
             return self.ANN_.predict(X)
 
-    def score(self, X, y):
+    def score(self, X, y, sample_weight=None):
         check_is_fitted(self)
         check_X_y(X, y, multi_output=True)
         predi = self.predict(X).T[0]
