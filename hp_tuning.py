@@ -6,21 +6,29 @@ import numpy as np
 import pandas as pd
 import kerastuner as kt
 import tensorflow as tf
-from sklearn.model_selection import KFold
+from tensorflow.keras.layers import InputLayer, Dense, Dropout, BatchNormalization
+from sklearn.model_selection import train_test_split
 
-from estimator import ANN
+from estimator import Layer, ann
 
 
 def hp_estimator(hp):
-    shape = []
-    for i in range(hp.Int("layers", 3, 10)):
-        shape.append(hp.Int("units_"+str(i), 10, 50, step=10))
-    drop_out = hp.Float("drop_out", 0.01, 0.1, step=0.01)
-    activation = hp.Choice("activation", ["relu", "sigmoid"])
-    loss = hp.Choice("loss", ["mae", "mse"])
-    batch_norm = hp.Boolean("batch_norm", default=False)
+    layers = []
+    for i in range(hp.Int("layers", 5, 10, default=5)):
+        dense = Layer(kind=Dense,
+                      units=hp.Int("units_" + str(i), 10, 50, step=10),
+                      activation=hp.Choice("act_" + str(i), ["relu", "sigmoid"]),
+                      kernel_regularizer=hp.Choice("reg_" + str(i), ["l2"]))
+        layers.append(dense)
+        layers.append(Layer(kind=Dropout, rate=hp.Float("do_" + str(i), 0.01, 0.05, step=0.01)))
+        if hp.Boolean("norm_" + str(i)):
+            layers.append(Layer(kind=BatchNormalization))
 
-    return ANN(shape=shape, drop_out=drop_out, activation=activation, loss=loss, batch_norm=batch_norm, verbose=0)
+    l_rate = hp.Float("learning_rate", 0.001, 0.005, step=0.001)
+    optimizer = tf.keras.optimizers.Adagrad(learning_rate=l_rate)
+    loss = hp.Choice("loss", ["mae", "mse"])
+    out_len = hp.Int("out", 1, 10)
+    return ann(layers, out_len, loss, optimizer)
 
 
 def load_inp_folder(path):
@@ -47,23 +55,32 @@ def main():
     print(i_ref)
     print(o_ref)
 
-    tuner = kt.tuners.Sklearn(
-        oracle=kt.oracles.Hyperband(
-            objective=kt.Objective('score', 'max'),
-            max_epochs=20000),
-        hypermodel=hp_estimator,
-        cv=KFold(5),
-        directory='.',
-        project_name=folder+"_hp")
+    hp = kt.HyperParameters()
+    if len(y_tr.shape) > 1:
+        hp.Fixed("out", y_tr.shape[1])
+    else:
+        hp.Fixed("out", 1)
+
+    tuner = kt.tuners.Hyperband(
+        hp_estimator,
+        "val_mae",
+        20000
+    )
 
     print(tuner.search_space_summary())
 
-    tuner.search(x_tr,
-                 y_tr)
+    x_tr_v, x_val, y_tr_v, y_val = train_test_split(x_tr, y_tr)
+
+    tuner.search(x_tr_v,
+                 y_tr_v,
+                 validation_data=(x_val, y_val),
+                 batch_size=1000,
+                 callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3)]
+                 )
     best_model = tuner.get_best_models()[0]
     print(tuner.get_best_hyperparameters()[0])
     best_model.fit(x_tr, y_tr)
-    print(best_model.score(x_te, y_te))
+    print(best_model.evaluate(x_te, y_te))
 
 
 if __name__ == "__main__":
