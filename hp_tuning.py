@@ -15,17 +15,21 @@ from estimator import Layer, ann
 
 def hp_estimator(hp):
     layers = []
+    act = hp.Choice("activation", ["relu", "sigmoid", "tanh"])
+    reg = hp.Choice("regularizer", ["l2", "l1"])
+    drop_out = hp.Float("drop_out", 0.0, 0.05, step=0.01)
+    norm = hp.Boolean("norm")
     for i in range(hp.Int("layers", 5, 10, default=5)):
         dense = Layer(kind=Dense,
                       units=hp.Int("units_" + str(i), 10, 50, step=10),
-                      activation=hp.Choice("act_" + str(i), ["relu"]),  # , "sigmoid"]),
-                      kernel_regularizer=hp.Choice("reg_" + str(i), ["l2"]))
+                      activation=act,
+                      kernel_regularizer=reg)
         layers.append(dense)
-        layers.append(Layer(kind=Dropout, rate=hp.Float("do_" + str(i), 0.01, 0.05, step=0.01)))
-        if hp.Boolean("norm_" + str(i)):
+        layers.append(Layer(kind=Dropout, rate=drop_out))
+        if norm:
             layers.append(Layer(kind=BatchNormalization))
 
-    l_rate = hp.Float("learning_rate", 0.001, 0.005, step=0.001)
+    l_rate = 0.0015  # hp.Float("learning_rate", 0.001, 0.005, step=0.001)
     optimizer = tf.keras.optimizers.Adagrad(learning_rate=l_rate)
     loss = hp.Choice("loss", ["mae", "mse"])
     out_len = hp.Int("out", 1, 10)
