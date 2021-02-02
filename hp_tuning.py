@@ -19,9 +19,9 @@ def hp_estimator(hp):
     reg = hp.Choice("regularizer", ["l2", "l1"])
     drop_out = hp.Float("drop_out", 0.0, 0.05, step=0.01)
     norm = hp.Boolean("norm")
-    for i in range(hp.Int("layers", 5, 10, default=5)):
+    for i in range(hp.Int("layers", 6, 8, default=6)):
         dense = Layer(kind=Dense,
-                      units=hp.Int("units_" + str(i), 10, 50, step=10),
+                      units=hp.Int("units_" + str(i), 20, 50, step=15),
                       activation=act,
                       kernel_regularizer=reg)
         layers.append(dense)

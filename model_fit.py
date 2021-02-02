@@ -23,6 +23,7 @@ def get_args():
     parser.add_argument("--epochs", "-e", type=int, default=10000)
     parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
+    parser.add_argument("--patience", "-p", type=int, default=10)
     args = parser.parse_args()
     return args.__dict__
 
@@ -59,7 +60,9 @@ def main():
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
-    est.fit(x_tr, y_tr, args["batch_size"], epochs=args["epochs"], verbose=args["verbose"])
+    est.fit(x_tr, y_tr, args["batch_size"],
+            epochs=args["epochs"], verbose=args["verbose"],
+            callbacks=tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=1e-4))
     dur = time.time() - start
     print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
     print(est.evaluate(x_te, y_te))
