@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -17,7 +18,7 @@ def hp_estimator(hp):
     for i in range(hp.Int("layers", 5, 10, default=5)):
         dense = Layer(kind=Dense,
                       units=hp.Int("units_" + str(i), 10, 50, step=10),
-                      activation=hp.Choice("act_" + str(i), ["relu", "sigmoid"]),
+                      activation=hp.Choice("act_" + str(i), ["relu"]),  # , "sigmoid"]),
                       kernel_regularizer=hp.Choice("reg_" + str(i), ["l2"]))
         layers.append(dense)
         layers.append(Layer(kind=Dropout, rate=hp.Float("do_" + str(i), 0.01, 0.05, step=0.01)))
@@ -48,8 +49,18 @@ def main():
     args = get_args()
     folder = args["inp-folder"]
     del args["inp-folder"]
+
     loc = os.path.dirname(sys.argv[0])
     data_loc = os.path.join(loc, "Data")
+    log_dir = os.path.join(loc, "logs")
+    log_search_dir = os.path.join(log_dir, datetime.datetime.now().strftime("%m%d-%H%M"))
+
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+
+    if not os.path.exists(log_search_dir):
+        os.mkdir(log_search_dir)
+
     x_tr, x_te, y_tr, y_te, i_ref, o_ref = load_inp_folder(os.path.join(data_loc, folder))
 
     print(i_ref)
@@ -61,21 +72,31 @@ def main():
     else:
         hp.Fixed("out", 1)
 
+    hist_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=log_search_dir,
+        histogram_freq=1,
+        embeddings_freq=1,
+        write_graph=True,
+        update_freq='batch')
+
     tuner = kt.tuners.Hyperband(
         hp_estimator,
         "val_mae",
-        20000
+        20000,
+        directory=log_search_dir,
+        hyperparameters=hp
     )
 
     print(tuner.search_space_summary())
 
-    x_tr_v, x_val, y_tr_v, y_val = train_test_split(x_tr, y_tr)
+    x_tr_v, x_val, y_tr_v, y_val = train_test_split(x_tr, y_tr)  # get validation set
 
     tuner.search(x_tr_v,
                  y_tr_v,
                  validation_data=(x_val, y_val),
                  batch_size=1000,
-                 callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3)]
+                 callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3),
+                            hist_callback]
                  )
     best_model = tuner.get_best_models()[0]
     print(tuner.get_best_hyperparameters()[0])

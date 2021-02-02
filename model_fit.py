@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import time
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,7 @@ def get_args():
     parser.add_argument("--loss", "-l", default="mae")
     parser.add_argument("--rate", "-r", type=float, default=0.001)
     parser.add_argument("--epochs", "-e", type=int, default=10000)
+    parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
     args = parser.parse_args()
     return args.__dict__
@@ -56,14 +58,17 @@ def main():
 
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
-    est.fit(x_tr, y_tr, epochs=args["epochs"], verbose=args["verbose"])
+    start = time.time()
+    est.fit(x_tr, y_tr, args["batch_size"], epochs=args["epochs"], verbose=args["verbose"])
+    dur = time.time() - start
+    print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
     print(est.evaluate(x_te, y_te))
     x = np.append(x_tr, x_te, axis=0)
     y = np.append(y_tr, y_te, axis=0)
     
     pred = est.predict(x)
     
-    np.savez_compressed("val_v_pred", val=y, pred=pred)
+    np.savez_compressed("val_v_pred.npz", val=y, pred=pred)
 
 
 if __name__ == "__main__":
