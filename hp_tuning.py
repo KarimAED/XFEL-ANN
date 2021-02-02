@@ -15,13 +15,13 @@ from estimator import Layer, ann
 
 def hp_estimator(hp):
     layers = []
-    act = hp.Choice("activation", ["relu", "sigmoid", "tanh"])
+    act = hp.Choice("activation", ["relu", "tanh"])
     reg = hp.Choice("regularizer", ["l2", "l1"])
-    drop_out = hp.Float("drop_out", 0.0, 0.05, step=0.01)
+    drop_out = hp.Float("drop_out", 0.0, 0.05, step=0.025)
     norm = hp.Boolean("norm")
     for i in range(hp.Int("layers", 6, 8, default=6)):
         dense = Layer(kind=Dense,
-                      units=hp.Int("units_" + str(i), 20, 50, step=15),
+                      units=hp.Int("units_" + str(i), 20, 50, step=30),
                       activation=act,
                       kernel_regularizer=reg)
         layers.append(dense)
