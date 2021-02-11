@@ -108,8 +108,7 @@ def main():
                  y_tr_v,
                  validation_data=(x_val, y_val),
                  batch_size=1000,
-                 callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3),
-                            hist_callback]
+                 callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3)]
                  )
     best_model = tuner.get_best_models()[0]
     print(tuner.get_best_hyperparameters()[0])
