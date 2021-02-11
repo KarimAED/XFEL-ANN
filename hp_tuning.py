@@ -89,13 +89,15 @@ def main():
         write_graph=True,
         update_freq='batch')
 
-    tuner = kt.tuners.bayesianOptimization(
+    tuner = kt.tuners.BayesianOptimization(
         hp_estimator,
         "val_mae",
         3000,
         num_initial_points=10,
         directory=log_search_dir,
-        hyperparameters=hp
+        hyperparameters=hp,
+        distribution_strategy=tf.distribute.MirroredStrategy(),
+        project_name="XFEL-ANN"
     )
 
     print(tuner.search_space_summary())
