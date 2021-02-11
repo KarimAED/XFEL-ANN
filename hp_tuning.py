@@ -89,10 +89,11 @@ def main():
         write_graph=True,
         update_freq='batch')
 
-    tuner = kt.tuners.Hyperband(
+    tuner = kt.tuners.bayesianOptimization(
         hp_estimator,
         "val_mae",
-        20000,
+        3000,
+        num_initial_points=10,
         directory=log_search_dir,
         hyperparameters=hp
     )
