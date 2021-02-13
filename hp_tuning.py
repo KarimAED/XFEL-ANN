@@ -92,7 +92,7 @@ def main():
     tuner = kt.tuners.BayesianOptimization(
         hp_estimator,
         "val_mae",
-        3000,
+        500,
         num_initial_points=10,
         directory=log_search_dir,
         hyperparameters=hp,
@@ -111,8 +111,8 @@ def main():
                  callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3)]
                  )
     best_model = tuner.get_best_models()[0]
-    print(tuner.get_best_hyperparameters()[0])
-    best_model.fit(x_tr, y_tr)
+    print(tuner.get_best_hyperparameters()[0].values)
+    best_model.fit(x_tr, y_tr, batch_size=1000, epochs=20000)
     print(best_model.evaluate(x_te, y_te))
 
 
