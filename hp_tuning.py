@@ -106,6 +106,8 @@ def main():
 
     tuner.search(x_tr_v,
                  y_tr_v,
+                 epochs=10,
+                 verbose=2,
                  validation_data=(x_val, y_val),
                  batch_size=1000,
                  callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=3)]
