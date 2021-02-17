@@ -62,7 +62,7 @@ def main():
     start = time.time()
     est.fit(x_tr, y_tr, args["batch_size"],
             epochs=args["epochs"], verbose=args["verbose"],
-            callbacks=tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=1e-4))
+            callbacks=tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=1e-6))
     dur = time.time() - start
     print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
     print(est.evaluate(x_te, y_te))
