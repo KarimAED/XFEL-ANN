@@ -52,7 +52,7 @@ def main():
         layer_list.append(Layer(Dense, units=i, activation=args["activation"]))
         layer_list.append(Layer(Dropout, rate=args["drop_out"]))
         if args["batch_norm"]:
-            layer_list.append(Layer(BatchNormalisation))
+            layer_list.append(Layer(BatchNormalization))
 
     if len(y_tr.shape) > 1:
         out_sh = y_tr.shape[1]
