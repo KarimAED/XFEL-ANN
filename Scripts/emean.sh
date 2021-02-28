@@ -4,6 +4,6 @@
 module load anaconda3/personal
 module load cuda
 
-python $HOME/XFEL-ANN/model_fit.py EMean --shape 10 10 10 10 10 10 -vv -a relu -l mae -e 20000 --batch_norm False
+python $HOME/XFEL-ANN/model_fit.py EMean --shape 10 10 10 10 10 10 -vv -a relu -l mae -e 20000 --batch_norm False -p 1000
 mkdir $WORK/emean_$PBS_JOBID
 cp -r * $WORK/emean_$PBS_JOBID
