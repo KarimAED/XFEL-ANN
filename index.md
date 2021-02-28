@@ -1,37 +1,47 @@
-## Welcome to GitHub Pages
+# XFEL-ANN
+The Code and data for my research project on XFEL-Data prediction with ANNs (first report https://www.overleaf.com/read/nvqtmzvyhsgf). It uses data from https://www.github.com/alvarosg/DataLCLS2017 and was developed to run on the Imperial College London (ICL) HPC.
 
-You can use the [editor on GitHub](https://github.com/KarimAED/XFEL-ANN/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+## Requirements
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+In order to run this code, the following packages are needed
 
-### Markdown
+* numpy
+* scipy
+* pandas
+* scikit-learn
+* tensorflow
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Most of these can be installed from the pyproject.toml with poetry. Only tensorflow cannot, as the execution on the ICL HPC used tensorflow-gpu, which was not usable for my
+development environment.
 
-```markdown
-Syntax highlighted code block
+## Setup
 
-# Header 1
-## Header 2
-### Header 3
+In order to run the code, you can follow either of two methods:
 
-- Bulleted
-- List
+* clone from branch 'main' and run setup.py
+* clone from branch 'Data_incl' with the datasets included
 
-1. Numbered
-2. List
+If you intend to run the code on the ICL HPC, cloning from 'Data_incl' is the recommended method, as it includes submission scripts for said HPC.
 
-**Bold** and _Italic_ and `Code` text
+## Usage
 
-[Link](url) and ![Image](src)
-```
+This repository provides a general purpose sklearn estimator for simple dense feed-forward neural networks (FFNNs). It furthermore provides the preprocessing pipelines described in the attached report.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+There are 2 cases for which code is currently provided:
 
-### Jekyll Themes
+* Single Pulse Mean Energy Prediction
+* Double Pulse Delay Prediction
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/KarimAED/XFEL-ANN/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+the files labelled:
 
-### Support or Contact
+delay_est.py
+emean_est.py
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+contain the code to fit a single FFNN with given parameters on these datasets.
+
+To execute them on the ICL HPC, use the submission scripts from the 'Data_incl' branch in the Scripts folder.
+To instead run them locally, simply execute them in a python environment with the given requirements (see above).
+
+## Troubleshooting
+
+In case of a "file not found" error, make sure that the directory into which the project is cloned is called "XFEL-ANN". For any further questions, do not hesitate to raise an issue on this repository or contact me under karimaed@gmx.de
