@@ -1,5 +1,4 @@
-# XFEL-ANN
-The Code and data for my research project on XFEL-Data prediction with ANNs (first report https://www.overleaf.com/read/nvqtmzvyhsgf). It uses data from https://www.github.com/alvarosg/DataLCLS2017 and was developed to run on the Imperial College London (ICL) HPC.
+The Code and data for my research project on XFEL-Data prediction with ANNs (first report https://www.overleaf.com/read/nvqtmzvyhsgf). It uses data from [here](https://www.github.com/alvarosg/DataLCLS2017) and was developed to run on the Imperial College London (ICL) HPC.
 
 ## Requirements
 
