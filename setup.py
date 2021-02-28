@@ -62,7 +62,7 @@ def format_single(source, target):
             sf_list = [sf_lam(i) for i in data["UXSSingleFitList"]]
             sf_data = np.stack(sf_list)
             if not optical_labels:
-                optical_labels = ["GaussAmp", "GaussMean_eV", "GaussStd_eV", "FitMask"]\
+                optical_labels = ["GaussAmp", "GaussMean_pxl", "GaussStd_pxl", "FitMask"]\
                                  + data["xUXS"].astype("str").tolist()
 
                 fit_info = np.append(sf_data, np.array([data["UXSSingleFitListMask"]]).T, axis=1)

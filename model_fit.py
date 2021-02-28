@@ -6,6 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 
 from estimator import ann, Layer
@@ -24,6 +25,7 @@ def get_args():
     parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
     parser.add_argument("--patience", "-p", type=int, default=10)
+    parser.add_argument("--validation_split", "-vs", type=float, default=0.1)
     args = parser.parse_args()
     return args.__dict__
 
@@ -57,22 +59,49 @@ def main():
     else:
         out_sh = 1
 
+    stopper = tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=1e-6)
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
-    est.fit(x_tr, y_tr, args["batch_size"],
-            epochs=args["epochs"], verbose=args["verbose"],
-            callbacks=tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=1e-6))
+    hist = est.fit(x_tr, y_tr, args["batch_size"],
+                   epochs=args["epochs"], verbose=args["verbose"],
+                   validation_split=args["validation_split"],
+                   callbacks=stopper)
     dur = time.time() - start
     print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
     print(est.evaluate(x_te, y_te))
-    x = np.append(x_tr, x_te, axis=0)
-    y = np.append(y_tr, y_te, axis=0)
-    
-    pred = est.predict(x)
-    
-    np.savez_compressed("val_v_pred.npz", val=y, pred=pred)
 
+    label = time.time()
+
+    pred_tr = est.predict(x_tr)*o_ref.loc["train_std",:].values + o_ref.loc["train_mean",:].values
+    pred_te = est.predict(x_te)*o_ref.loc["test_std",:].values + o_ref.loc["test_mean",:].values
+    d_y_tr = y_tr*o_ref.loc["train_std",:].values + o_ref.loc["train_mean",:].values
+    d_y_te = y_te*o_ref.loc["test_std",:].values + o_ref.loc["test_mean",:].values
+
+    plt.figure()
+    x = np.arange(np.min(d_y_tr), np.max(d_y_tr), 0.01)
+    plt.grid()
+    plt.plot(x, x, "k--", label="x=y")
+    plt.scatter(d_y_tr, pred_tr, s=1, alpha=0.5, c="blue", label="Training set")
+    plt.scatter(d_y_te, pred_te, s=1, alpha=0.5, c="red", label="Test set")
+    plt.legend()
+    plt.savefig("pvm_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
+
+    plt.figure()
+    plt.grid()
+    plt.plot(hist.history["loss"], label="Training loss")
+    plt.plot(hist.history["val_loss"], label="Validation loss")
+    plt.legend()
+    plt.savefig("loss_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
+
+    plt.figure()
+    plt.grid()
+    plt.plot(hist.history["mae"], label="Training MAE")
+    plt.plot(hist.history["val_mae"], label="Validation MAE")
+    plt.legend()
+    plt.savefig("mae_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
+
+    est.save("model_"+str(args["inp-folder"]+"_"+str(label)))
 
 if __name__ == "__main__":
     sys.exit(main())
