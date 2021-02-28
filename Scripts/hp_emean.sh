@@ -4,6 +4,6 @@
 module load anaconda3/personal
 module load cuda
 
-python $HOME/XFEL-ANN/hp_tuning.py Delays
-mkdir $WORK/hp_delay_$PBS_JOBID
-cp -r * $WORK/hp_delay_$PBS_JOBID
+python $HOME/XFEL-ANN/hp_tuning.py EMean
+mkdir $WORK/hp_emean_$PBS_JOBID
+cp -r * $WORK/hp_emean_$PBS_JOBID
