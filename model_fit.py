@@ -25,6 +25,7 @@ def get_args():
     parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
     parser.add_argument("--patience", "-p", type=int, default=10)
+    parser.add_argument("--p_delta", "-pd", type=float, default=1e-6)
     parser.add_argument("--validation_split", "-vs", type=float, default=0.1)
     args = parser.parse_args()
     return args.__dict__
@@ -59,7 +60,7 @@ def main():
     else:
         out_sh = 1
 
-    stopper = tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=1e-6)
+    stopper = tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=args["p_delta"])
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
