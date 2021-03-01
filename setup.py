@@ -2,8 +2,10 @@ import sys
 import os
 
 import numpy as np
+import pandas as pd
 
 from delay_prep import save_delays
+from emean_prep import save_emean
 
 
 def get_inputs(source, files):
@@ -127,6 +129,30 @@ def format_double(source, target):
     np.savetxt("double_outputs.tsv.gz", output, delimiter="\t", header="\t".join(output_labels), comments="")
     os.chdir(d)
 
+def format_new(source, target):
+    fname = os.path.join(source, "Run203_98318_events.pkl.gz")
+    new_df = pd.read_pickle(fname)
+
+    inp_df = pd.DataFrame()
+    out_df = pd.DataFrame()
+
+    for name, column in new_df.iteritems():
+        inp = [name.startswith(i) and (not "DESC" in name) for i in ["epic_", "ebeam", "f_"]]
+        if any(inp):
+            inp_df[name] = column
+
+        if name == "XTCAV_pump_probe_delay":
+            out_df["Delays"] = column
+            out_df["DelayMask"] = out_df["Delays"] > -20
+
+    d = os.getcwd()
+    if not os.path.exists(target):
+        os.mkdir(target)
+    os.chdir(target)
+    np.savetxt("new_inputs.tsv.gz", inp_df.values.astype(np.float64),
+               delimiter="\t", header="\t".join(inp_df.columns), comments="")
+    np.savetxt("new_outputs.tsv.gz", out_df.values.astype(np.float64),
+               delimiter="\t", header="\t".join(out_df.columns), comments="")
 
 if __name__ == "__main__":
     f_path = os.path.dirname(sys.argv[0])
@@ -137,9 +163,16 @@ if __name__ == "__main__":
     data_dir = os.path.join(f_path, "DataLCLS2017/Data/")
     single_dir = os.path.join(data_dir, "amof6215")
     double_dir = os.path.join(data_dir, "amo86815")
-
+    new_dir = os.path.join(f_path, "DataLCLSNew")
     if os.path.normpath(f_path) != ".":
         os.chdir(f_path)
     format_single(single_dir, target_dir)
     format_double(double_dir, target_dir)
+    print("Loading DataLCLSNew...")
+    format_new(new_dir, target_dir)
+    print("Done.")
     save_delays(f_path, 0.15)
+    print("Preprocessing DataLCLSNew...")
+    save_delays(f_path, 0.15, new=True)
+    print("Done.")
+    save_emean(f_path, 0.15)
