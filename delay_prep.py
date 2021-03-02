@@ -38,7 +38,11 @@ def prep_delay_data(proj_dir, split=0.15, new=False):
     print(delay_inp.shape[0], "events left.")
     print("Filtering input columns...")
     # Filter input features by variance
-    feat_columns = [c for c in delay_inp if len(np.unique(delay_inp[c])) > 10]
+    if new:
+        var_thresh = 50
+    else:
+        var_thresh = 10
+    feat_columns = [c for c in delay_inp if len(np.unique(delay_inp[c])) > var_thresh]
     delay_inp = delay_inp[feat_columns]
 
     print(delay_inp.shape[1], "columns left.")

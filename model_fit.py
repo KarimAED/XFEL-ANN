@@ -21,6 +21,7 @@ def get_args():
     parser.add_argument("--activation", "-a", default="relu")
     parser.add_argument("--loss", "-l", default="mae")
     parser.add_argument("--rate", "-r", type=float, default=0.001)
+    parser.add_argument("--regularizer", "-reg", choices=["l1", "l2"], default=None)
     parser.add_argument("--epochs", "-e", type=int, default=10000)
     parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
@@ -50,7 +51,7 @@ def main():
 
     layer_list = []
     for i in args["shape"]:
-        layer_list.append(Layer(Dense, units=i, activation=args["activation"]))
+        layer_list.append(Layer(Dense, units=i, activation=args["activation"], kernel_regularizer=args["regularizer"]))
         layer_list.append(Layer(Dropout, rate=args["drop_out"]))
         if args["batch_norm"]:
             layer_list.append(Layer(BatchNormalization))
