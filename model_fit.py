@@ -25,6 +25,7 @@ def get_args():
     parser.add_argument("--epochs", "-e", type=int, default=10000)
     parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
+    parser.add_argument("--stopper", type=bool, default=False)
     parser.add_argument("--patience", "-p", type=int, default=10)
     parser.add_argument("--p_delta", "-pd", type=float, default=1e-6)
     parser.add_argument("--validation_split", "-vs", type=float, default=0.1)
@@ -65,10 +66,15 @@ def main():
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
-    hist = est.fit(x_tr, y_tr, args["batch_size"],
-                   epochs=args["epochs"], verbose=args["verbose"],
-                   validation_split=args["validation_split"],
-                   callbacks=stopper)
+    if args["stopper"]:
+        hist = est.fit(x_tr, y_tr, args["batch_size"],
+                       epochs=args["epochs"], verbose=args["verbose"],
+                       validation_split=args["validation_split"],
+                       callbacks=stopper)
+    else:
+        hist = est.fit(x_tr, y_tr, args["batch_size"],
+                       epochs=args["epochs"], verbose=args["verbose"],
+                       validation_split=args["validation_split"])
     dur = time.time() - start
     print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
     print(est.evaluate(x_te, y_te))
