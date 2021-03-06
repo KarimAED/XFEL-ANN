@@ -61,7 +61,7 @@ def main():
     else:
         out_sh = 1
 
-    stopper = tf.keras.callbacks.EarlyStopping(monitor="mae", patience=args["patience"], min_delta=args["p_delta"])
+    stopper = tf.keras.callbacks.EarlyStopping(monitor="val_mae", patience=args["patience"], min_delta=args["p_delta"])
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
