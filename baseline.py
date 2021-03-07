@@ -1,6 +1,7 @@
 import sys, os
 
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 def load_inp_folder(path):
@@ -21,9 +22,11 @@ def main():
     print(o_ref)
 
     lin = LinearRegression()
-    lin.fit_transform(x_tr, y_tr)
+    lin.fit(x_tr, y_tr)
 
-    print(lin.score(x_te, y_te))
+    pred = lin.predict(x_te)
+
+    print(np.mean(np.abs(pred-y_te)))
 
 if __name__ == '__main__':
     main()
