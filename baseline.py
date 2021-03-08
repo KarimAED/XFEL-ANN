@@ -3,6 +3,7 @@ import sys, os
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
 
 def load_inp_folder(path):
     data = np.load(os.path.join(path, "data.npz"))
@@ -22,11 +23,15 @@ def main():
     print(o_ref)
 
     lin = LinearRegression()
+    svr = SVR(C=1, epsilon=0.2)
     lin.fit(x_tr, y_tr)
+    svr.fit(x_tr, y_tr)
 
     pred = lin.predict(x_te)
+    pred_svr = svr.predict(x_te)
 
     print(np.mean(np.abs(pred-y_te)))
+    print(np.mean(np.abs(y_te-pred_svr)))
 
 if __name__ == '__main__':
     main()
