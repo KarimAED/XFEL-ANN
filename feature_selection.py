@@ -62,54 +62,32 @@ def main():
     else:
         out_sh = 1
 
-    stopper = tf.keras.callbacks.EarlyStopping(monitor="val_mae", patience=args["patience"], min_delta=args["p_delta"])
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
-    est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
-    if args["stopper"]:
-        hist = est.fit(x_tr, y_tr, args["batch_size"],
-                       epochs=args["epochs"], verbose=args["verbose"],
-                       validation_split=args["validation_split"],
-                       callbacks=stopper)
-    else:
-        hist = est.fit(x_tr, y_tr, args["batch_size"],
+    excluded_features = []
+    scores = []
+    for i in range(len(i_ref.columns)-60):
+        est = ann(layer_list, out_sh, args["loss"], opt)
+        mask = [not j==i_ref.columns[i] for j in i_ref.columns]
+        x_tr_masked = x_tr[:, mask]
+        x_te_masked = x_te[:, mask]
+        hist = est.fit(x_tr_masked, y_tr, args["batch_size"],
                        epochs=args["epochs"], verbose=args["verbose"],
                        validation_split=args["validation_split"])
+        excluded_features.append(i_ref.columns[i])
+        scores.append(est.evaluate(x_te_masked, y_te)[1])
     dur = time.time() - start
-    print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
-    print(est.evaluate(x_te, y_te))
-
+    print(f"Runtime: {dur}")
+    feature_rank = pd.DataFrame({"features": excluded_features, "mae_score": scores})
+    feature_rank.sort_values("mae_score", inplace=True, ascending=False)
+    print(feature_rank.head())
+    plt.figure(figsize=(20, 7))
+    plt.bar(feature_rank["features"], feature_rank["mae_score"])
+    plt.xticks(rotation=90)
     label = time.time()
-
-    pred_tr = est.predict(x_tr)*o_ref.loc["train_std",:].values + o_ref.loc["train_mean",:].values
-    pred_te = est.predict(x_te)*o_ref.loc["test_std",:].values + o_ref.loc["test_mean",:].values
-    d_y_tr = y_tr*o_ref.loc["train_std",:].values + o_ref.loc["train_mean",:].values
-    d_y_te = y_te*o_ref.loc["test_std",:].values + o_ref.loc["test_mean",:].values
-
-    plt.figure()
-    x = np.arange(np.min(d_y_tr), np.max(d_y_tr), 0.01)
-    plt.grid()
-    plt.plot(x, x, "k--", label="x=y")
-    plt.scatter(d_y_tr, pred_tr, s=1, alpha=0.5, c="blue", label="Training set")
-    plt.scatter(d_y_te, pred_te, s=1, alpha=0.5, c="red", label="Test set")
-    plt.legend()
-    plt.savefig("pvm_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
-
-    plt.figure()
-    plt.grid()
-    plt.plot(hist.history["loss"], label="Training loss")
-    plt.plot(hist.history["val_loss"], label="Validation loss")
-    plt.legend()
-    plt.savefig("loss_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
-
-    plt.figure()
-    plt.grid()
-    plt.plot(hist.history["mae"], label="Training MAE")
-    plt.plot(hist.history["val_mae"], label="Validation MAE")
-    plt.legend()
-    plt.savefig("mae_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
-
-    est.save("model_"+str(args["inp-folder"]+"_"+str(label)))
+    plt.ylabel("MAE")
+    plt.xlabel("Excluded Feature")
+    plt.savefig("feat_"+args["inp-folder"]+"_"+str(label)+".pdf", bbox_inches="tight")
 
 if __name__ == "__main__":
     sys.exit(main())

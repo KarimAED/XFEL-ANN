@@ -32,7 +32,7 @@ class Layer:
             self.rate = None
 
     def get_attr(self):
-        d = self.__dict__
+        d = self.__dict__.copy()
         del d["kind"]
         return {k: v for k, v in d.items() if v is not None}
 
