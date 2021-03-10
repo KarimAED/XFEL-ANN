@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 import numpy as np
 import scipy.stats as sps
@@ -13,7 +13,7 @@ def get_energy(pixel):
     return (pixel-m_pix)/a + m_ener
 
 
-def prep_delay_data(proj_dir, split=0.15):
+def prep_emean_data(proj_dir, split=0.15, var_level=10):
     # Load single pulse data
     single_inp = pd.read_table(os.path.join(proj_dir, "Data/single_inputs.tsv.gz"))
     single_out = pd.read_table(os.path.join(proj_dir, "Data/single_outputs.tsv.gz"))
@@ -33,10 +33,8 @@ def prep_delay_data(proj_dir, split=0.15):
     emean_out = emean_out.apply(lambda x: get_energy(x))
     emean_out.name = "GaussMean_eV"
 
-    print(emean_out)
-
     # Filter input features by variance
-    feat_columns = [c for c in emean_inp if len(np.unique(emean_inp[c])) > 10]
+    feat_columns = [c for c in emean_inp if len(np.unique(emean_inp[c])) > var_level]
     emean_inp = emean_inp[feat_columns]
 
     # Get mean absolute deviation of outputs
@@ -57,8 +55,8 @@ def prep_delay_data(proj_dir, split=0.15):
     return train_test_norm(emean_inp, emean_out, split)
 
 
-def save_emean(proj_dir, split=0.15):
-    x_tr, x_te, y_tr, y_te, x_ref, y_ref = prep_delay_data(proj_dir, split)
+def save_emean(proj_dir, split=0.15, var_level=10):
+    x_tr, x_te, y_tr, y_te, x_ref, y_ref = prep_emean_data(proj_dir, split, var_level)
     path = os.path.join(proj_dir, "Data/EMean")
     if not os.path.exists(path):
         d = os.getcwd()
@@ -72,7 +70,7 @@ def save_emean(proj_dir, split=0.15):
 
 def load_emean(proj_dir, split=0.15):
     if not os.path.exists(os.path.join(proj_dir, "Data/EMean")):
-        save_delays(proj_dir, split)
+        save_emean(proj_dir, split)
 
     data = np.load(os.path.join(proj_dir, "Data/EMean/data.npz"))
 
@@ -87,5 +85,9 @@ def load_emean(proj_dir, split=0.15):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        var = int(sys.argv[1])
+    else:
+        var = 10
     # Run this to generate preprocessed delay files
-    save_emean(os.getcwd())
+    save_emean(os.getcwd(), var_level=var)
