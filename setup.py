@@ -130,7 +130,7 @@ def format_double(source, target):
     os.chdir(d)
 
 def format_new(source, target):
-    fname = os.path.join(source, "Run203_98318_events.pkl.gz")
+    fname = os.path.join(source, "Run203_fixed.pkl.gz")
     new_df = pd.read_pickle(fname)
 
     inp_df = pd.DataFrame()
@@ -166,13 +166,13 @@ if __name__ == "__main__":
     new_dir = os.path.join(f_path, "DataLCLSNew")
     if os.path.normpath(f_path) != ".":
         os.chdir(f_path)
-    format_single(single_dir, target_dir)
-    format_double(double_dir, target_dir)
+    #format_single(single_dir, target_dir)
+    #format_double(double_dir, target_dir)
     print("Loading DataLCLSNew...")
     format_new(new_dir, target_dir)
     print("Done.")
-    save_delays(f_path, 0.15)
+    #save_delays(f_path, 0.15)
     print("Preprocessing DataLCLSNew...")
     save_delays(f_path, 0.15, new=True)
     print("Done.")
-    save_emean(f_path, 0.15)
+    #save_emean(f_path, 0.15)
