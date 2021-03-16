@@ -143,7 +143,9 @@ def format_new(source, target):
 
         if name == "XTCAV_pump_probe_delay":
             out_df["Delays"] = column
-            out_df["DelayMask"] = out_df["Delays"] > -20
+            m1 = out_df["Delays"] > 10
+            m2 = out_df["Delays"] < 20
+            out_df["DelayMask"] = m1 & m2
 
     d = os.getcwd()
     if not os.path.exists(target):
