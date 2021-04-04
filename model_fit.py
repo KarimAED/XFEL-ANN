@@ -25,9 +25,6 @@ def get_args():
     parser.add_argument("--epochs", "-e", type=int, default=10000)
     parser.add_argument("--batch_size", "-bs", type=int, default=1000)
     parser.add_argument("--batch_norm", type=bool, default=False)
-    parser.add_argument("--stopper", type=bool, default=False)
-    parser.add_argument("--patience", "-p", type=int, default=10)
-    parser.add_argument("--p_delta", "-pd", type=float, default=1e-6)
     parser.add_argument("--validation_split", "-vs", type=float, default=0.1)
     args = parser.parse_args()
     return args.__dict__
@@ -40,6 +37,16 @@ def load_inp_folder(path):
     return data["x_train"], data["x_test"], data["y_train"], data["y_test"], iref, oref
 
 
+def get_layers(args):
+    layer_list = []
+    for i in args["shape"]:
+        layer_list.append(Layer(Dense, units=i, activation=args["activation"], kernel_regularizer=args["regularizer"]))
+        layer_list.append(Layer(Dropout, rate=args["drop_out"]))
+        if args["batch_norm"]:
+            layer_list.append(Layer(BatchNormalization))
+    return layer_list
+
+
 def main():
     args = get_args()
     folder = args["inp-folder"]
@@ -50,31 +57,19 @@ def main():
     print(i_ref)
     print(o_ref)
 
-    layer_list = []
-    for i in args["shape"]:
-        layer_list.append(Layer(Dense, units=i, activation=args["activation"], kernel_regularizer=args["regularizer"]))
-        layer_list.append(Layer(Dropout, rate=args["drop_out"]))
-        if args["batch_norm"]:
-            layer_list.append(Layer(BatchNormalization))
+    layer_list = get_layers(args)
 
     if len(y_tr.shape) > 1:
         out_sh = y_tr.shape[1]
     else:
         out_sh = 1
 
-    stopper = tf.keras.callbacks.EarlyStopping(monitor="val_mae", patience=args["patience"], min_delta=args["p_delta"])
     opt = tf.keras.optimizers.Adagrad(learning_rate=args["rate"])
     est = ann(layer_list, out_sh, args["loss"], opt)
     start = time.time()
-    if args["stopper"]:
-        hist = est.fit(x_tr, y_tr, args["batch_size"],
-                       epochs=args["epochs"], verbose=args["verbose"],
-                       validation_split=args["validation_split"],
-                       callbacks=stopper)
-    else:
-        hist = est.fit(x_tr, y_tr, args["batch_size"],
-                       epochs=args["epochs"], verbose=args["verbose"],
-                       validation_split=args["validation_split"])
+    hist = est.fit(x_tr, y_tr, args["batch_size"],
+                   epochs=args["epochs"], verbose=args["verbose"],
+                   validation_split=args["validation_split"])
     dur = time.time() - start
     print("Finished Fitting after {}s, {}s/epoch.".format(dur, dur/args["epochs"]))
     print(est.evaluate(x_te, y_te))

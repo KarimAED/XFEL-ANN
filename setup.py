@@ -130,7 +130,7 @@ def format_double(source, target):
     os.chdir(d)
 
 def format_new(source, target):
-    fname = os.path.join(source, "Run203_fixed.pkl.gz")
+    fname = os.path.join(source, "Run203_98318_events_corrected.pkl")
     new_df = pd.read_pickle(fname)
 
     inp_df = pd.DataFrame()
@@ -143,8 +143,8 @@ def format_new(source, target):
 
         if name == "XTCAV_pump_probe_delay":
             out_df["Delays"] = column
-            m1 = out_df["Delays"] > 10
-            m2 = out_df["Delays"] < 20
+            m1 = out_df["Delays"] > 5
+            m2 = out_df["Delays"] < 30
             out_df["DelayMask"] = m1 & m2
 
     d = os.getcwd()
