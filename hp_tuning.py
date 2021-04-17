@@ -10,6 +10,7 @@ import kerastuner as kt
 import tensorflow as tf
 from tensorflow.keras.layers import InputLayer, Dense, Dropout, BatchNormalization
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 from estimator import Layer, ann
 
@@ -88,7 +89,7 @@ def main():
     hp.Fixed("norm", False)
     hp.Fixed("drop_out", 0.0)
 
-    num_trials = 10
+    num_trials = 100
 
     tuner = kt.tuners.BayesianOptimization(
         hp_estimator,
@@ -117,7 +118,7 @@ def main():
 
     tuner.search(x_tr_v,
                  y_tr_v,
-                 epochs=100,
+                 epochs=3000,
                  verbose=2,
                  validation_data=(x_val, y_val),
                  batch_size=1000,
@@ -127,7 +128,7 @@ def main():
 
     rand_tuner.search(x_tr_v,
                  y_tr_v,
-                 epochs=100,
+                 epochs=3000,
                  verbose=2,
                  validation_data=(x_val, y_val),
                  batch_size=1000,
@@ -143,8 +144,19 @@ def main():
     tr_score = [trial.score for trial in trials][::-1]
     ra_score = [trial.score for trial in rand_trials][::-1]
 
-    print(tr_score)
-    print(ra_score)
+    
+    plt.style.use("mystyle-2.mpl")
+    
+    plt.figure(figsize=(7, 7))
+    
+    plt.plot(tr_score, label="Bayesian Optimisation")
+    plt.plot(ra_score, label="Random Search")
+    
+    plt.legend()
+
+    label = time.time()
+
+    plt.savefig("hp_"+args["inp-folder"]+"_"+str(label))
 
     if args["refit-best"]:
         best_model = tuner.get_best_models()[0]

@@ -153,7 +153,7 @@ def fit_ann(args, x_tr, y_tr):
     label = time.time()
     plot_hist(args, hist, label)
 
-    est.save("nn_"+str(args["inp-folder"]+"_"+str(label)))
+    est.save("ann_"+str(args["inp-folder"]+"_"+str(label)))
     return est
 
 
