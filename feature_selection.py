@@ -77,13 +77,13 @@ def main():
     plt.bar(feature_rank["features"], feature_rank["mae_score"]*o_ref.loc["test_std"].values)
     plt.xticks(rotation=90)
     label = time.time()
-    plt.ylabel("MAE in fs")
+    plt.ylabel("MAE in eV")
     plt.xlabel("Excluded Feature")
     plt.savefig("feat_"+args["model"]+"_"+args["inp-folder"]+"_"+str(label)+".pdf", bbox_inches="tight")
 
     plt.figure(figsize=(7, 7))
     plt.plot(np.array(scores)*o_ref.loc["test_std"].values)
-    plt.ylabel("MAE in fs")
+    plt.ylabel("MAE in eV")
     plt.xlabel("Number of Features used")
     plt.savefig("feat-count_"+args["model"]+"_"+args["inp-folder"]+"_"+str(label)+".pdf", bbox_inches="tight")
 
