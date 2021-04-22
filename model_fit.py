@@ -69,33 +69,37 @@ def plot_pvm(args, est, x_tr, x_te, y_tr, y_te, o_ref, label):
     x = np.arange(np.min(d_y_tr), np.max(d_y_tr), 0.01)
     plt.plot(x, x, "k--", label="x=y")
     plt.scatter(d_y_tr, baseline_tr, s=0.5, alpha=0.2, c="black",
-                label=f"S.-G. et al.; MAE={round(np.mean(np.abs(d_y_te-baseline_te)), 3)}")
+                label=f"Linear Model; MAE={round(np.mean(np.abs(d_y_te-baseline_te)), 3)}")
     plt.scatter(d_y_te, baseline_te, s=0.5, alpha=0.2, c="black")
     try:
         mae = est.evaluate(x_te, y_te)[1]*o_ref.loc["test_std",:].values[0]
     except:
         mae = np.mean(np.abs(d_y_te-pred_te))
     plt.scatter(d_y_tr, pred_tr, s=0.5, alpha=0.2, c="blue",
-                label=f"{args['model']}; MAE={round(mae, 3)}")
+                label=f"New {args['model']}; MAE={round(mae, 3)}")
     plt.scatter(d_y_te, pred_te, s=0.5, alpha=0.2, c="blue")
     plt.legend()
-    plt.xlabel("Measured Mean Pulse Energy (eV)")
-    plt.ylabel("Predicted Mean Pulse Energy (eV)")
+    plt.xlabel("Measured Mean (eV)")
+    plt.ylabel("Predicted Mean (eV)")
     plt.savefig("pvm_"+str(args["model"])+"_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
 
 
 def plot_hist(args, hist, label):
     plt.figure()
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
     plt.plot(hist.history["loss"], label="Training loss")
     plt.plot(hist.history["val_loss"], label="Validation loss")
     plt.legend()
-    plt.savefig("loss_nn_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
+    plt.savefig("loss_ann_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
 
     plt.figure()
+    plt.xlabel("Epochs")
+    plt.ylabel("MAE in fs")
     plt.plot(hist.history["mae"], label="Training MAE")
     plt.plot(hist.history["val_mae"], label="Validation MAE")
     plt.legend()
-    plt.savefig("mae_nn_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
+    plt.savefig("mae_ann_"+str(args["inp-folder"])+"_"+str(label)+".pdf")
 
 
 def get_inp(folder):
@@ -114,11 +118,15 @@ def main():
     plt.style.use("mystyle-2.mplstyle")
 
     if args["model"] == "ann":
+        feats = ("ebeamLTU450", "ebeamL3Energy", "ebeamLTU250", "ebeamEnergyBC2")
+        filter = [i for i in range(len(i_ref.columns)) if i_ref.columns[i] in feats]
+        x_tr = x_tr[:, filter]
+        x_te = x_te[:, filter]
         est = fit_ann(args, x_tr, y_tr)
         print(est.evaluate(x_te, y_te))
     elif args["model"] == "grad-boost":
-        features = ("ebeamLTU450", "ebeamL3Energy", "ebeamLTU250", "ebeamEnergyBC2")
-        filter = [i for i in range(len(i_ref.columns)) if i_ref.columns[i] in features]
+        feats = ("ebeamLTU450", "ebeamL3Energy", "ebeamLTU250", "ebeamEnergyBC2")
+        filter = [i for i in range(len(i_ref.columns)) if i_ref.columns[i] in feats]
         x_tr = x_tr[:, filter]
         x_te = x_te[:, filter]
         est = fit_grad_boost(x_tr, y_tr)

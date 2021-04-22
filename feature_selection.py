@@ -43,7 +43,7 @@ def main():
         excluded_features.append(i_ref.columns[i])
         excluded_index.append(i)
         try:
-            scores.append(est.evaluate(x_te_masked, y_te))
+            scores.append(est.evaluate(x_te_masked, y_te)[1])
         except:
             scores.append(np.mean(np.abs(est.predict(x_te_masked) - y_te)))
     dur = time.time() - start
@@ -66,7 +66,7 @@ def main():
                 x_te_masked.append(np.zeros(x_te.shape[0]))
         x_te_masked = np.stack(x_te_masked).T
         try:
-            scores.append(est.evaluate(x_te_masked, y_te))
+            scores.append(est.evaluate(x_te_masked, y_te)[1])
         except:
             scores.append(np.mean(np.abs(est.predict(x_te_masked) - y_te)))
 
@@ -77,13 +77,13 @@ def main():
     plt.bar(feature_rank["features"], feature_rank["mae_score"]*o_ref.loc["test_std"].values)
     plt.xticks(rotation=90)
     label = time.time()
-    plt.ylabel("MAE in eV")
+    plt.ylabel("MAE in fs")
     plt.xlabel("Excluded Feature")
     plt.savefig("feat_"+args["model"]+"_"+args["inp-folder"]+"_"+str(label)+".pdf", bbox_inches="tight")
 
     plt.figure(figsize=(7, 7))
     plt.plot(np.array(scores)*o_ref.loc["test_std"].values)
-    plt.ylabel("MAE in eV")
+    plt.ylabel("MAE in fs")
     plt.xlabel("Number of Features used")
     plt.savefig("feat-count_"+args["model"]+"_"+args["inp-folder"]+"_"+str(label)+".pdf", bbox_inches="tight")
 

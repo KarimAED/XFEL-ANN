@@ -130,7 +130,7 @@ def format_double(source, target):
     os.chdir(d)
 
 def format_new(source, target):
-    fname = os.path.join(source, "Run203_20001_events_070421.pkl")
+    fname = os.path.join(source, "Run202_30001_events_140421.pkl")
     new_df = pd.read_pickle(fname)
 
     inp_df = pd.DataFrame()

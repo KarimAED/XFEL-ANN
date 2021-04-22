@@ -54,6 +54,7 @@ def load_inp_folder(path):
 def get_args():
     parser = argparse.ArgumentParser(description="Arguments for the model hyperparameter tuning.")
     parser.add_argument("inp-folder")
+    parser.add_argument("style-sheet")
     parser.add_argument("--refit-best", type=bool, default=False)
     return parser.parse_args().__dict__
 
@@ -145,7 +146,7 @@ def main():
     ra_score = [trial.score for trial in rand_trials][::-1]
 
     
-    plt.style.use("mystyle-2.mpl")
+    plt.style.use(args["style-sheet"])
     
     plt.figure(figsize=(7, 7))
     
